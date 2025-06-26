@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Wireless Chain Calculator</title>
+
+  <!-- keeps your wallpaper + global rules -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=5">
+
+  <!-- page-specific tweaks -->
+  <style>
+    :root      { --navy:#002b5c; --glass:#ffffff22; }
+    html,body  { min-height:100vh; margin:0; display:flex; flex-direction:column; }
+    body       { font-family:"Segoe UI", Arial, sans-serif; color:var(--navy); }
+
+    .wrapper   { flex:1; display:flex; flex-direction:column; align-items:center; }
+
+    form       { width:100%; max-width:480px; background:var(--glass);
+                 backdrop-filter:blur(6px); padding:24px 28px; border-radius:14px; }
+
+    h1,h3      { text-align:center; margin:10px 0 22px; font-weight:700; }
+
+    label      { display:block; margin-top:12px; font-weight:600; }
+
+    select,
+    input      { width:100%; padding:7px; margin-top:4px;
+                 border:1px solid #ccc; border-radius:6px; }
+
+    .btn       { margin-top:22px; width:100%; padding:10px;
+                 background:var(--navy); color:#fff; border:none;
+                 border-radius:8px; font-weight:700; cursor:pointer; }
+
+    .results   { width:100%; max-width:480px; margin:28px auto 0;
+                 background:#fff; color:var(--navy);
+                 border-radius:14px; padding:20px 26px;
+                 box-shadow:0 2px 6px #0002; }
+
+    ul         { list-style:disc; padding-left:26px; margin-top:6px; }
+
+    footer     { text-align:center; padding:12px 20px 20px; font-size:0.9em; background:#fafafa; border-top:1px solid #ccc; }
+    .course-info { margin-bottom:8px; }
+    .footer-home { display:inline-block; margin-top:8px; font-weight:600; color:var(--navy); text-decoration:none; }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <h1>Wireless Communication Chain</h1>
+  <p style="text-align:center;max-width:480px">
+    Enter parameters for each block. Intermediate rates are shown below.
+  </p>
+
+  <form method="POST">
+    {{ form.hidden_tag() }}
+
+    <label>LPF bandwidth (Hz)</label>
+    {{ form.lpf_bw(class="form-control") }}
+
+    <label>Quantiser bits / sample</label>
+    {{ form.quant_bits(class="form-control") }}
+
+    <label>Source-coding rate Rₛ</label>
+    {{ form.source_rate(class="form-control") }}
+
+    <label>Channel-code rate R_c</label>
+    {{ form.channel_rate(class="form-control") }}
+
+    <label>Burst overhead bits (O)</label>
+    {{ form.burst_O(class="form-control") }}
+
+    <label>Burst payload bits (D)</label>
+    {{ form.burst_D(class="form-control") }}
+
+    <label>Modulation scheme (bits / symbol)</label>
+    {{ form.modulation(class="form-control") }}
+
+    <button class="btn">{{ form.submit.label.text if form.submit else 'Calculate' }}</button>
+  </form>
+
+  {% if results %}
+  <div class="results">
+    <h3>Bit-rates</h3>
+    <ul>
+      <li><b>Sampler rate:</b> {{ results.fs }}</li>
+      <li><b>After quantiser:</b> {{ results.quant }}</li>
+      <li><b>After source coder:</b> {{ results.src }}</li>
+      <li><b>After channel coder:</b> {{ results.chan }}</li>
+      <li><b>After interleaver:</b> {{ results.intl }}</li>
+      <li><b>Burst O/D ratio:</b> {{ results.k_burst }}</li>
+      <li><b>After burst formatter:</b> {{ results.burst }}</li>
+      <li><b>Modulator symbol-rate:</b> {{ results.sym }}</li>
+    </ul>
+    <p style="font-size:.9rem">{{ results.explanation }}</p>
+  </div>
+  {% endif %}
+
+</div><!-- /wrapper -->
+
+<footer>
+  <div class="course-info">
+    <strong>Wireless & Mobile Networks, ENCS5323</strong><br>
+    Due 25 June 2025
+  </div>
+  <div>
+    Malak Moqbel – 1210608 &nbsp;|&nbsp;
+    Omar Hussain – 1212739
+  </div>
+  <a class="footer-home" href="{{ url_for('home') }}">← Home</a>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,5 @@
+Flask
+Flask-WTF
+python-dotenv
+openai>=1.14
+gunicorn

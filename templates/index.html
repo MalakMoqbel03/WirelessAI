@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI-Powered Designer</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=1">
+</head>
+<body>
+
+  <header class="main-header">
+    <h1>AI-Powered Web Application for Wireless and Mobile Network Design</h1>
+  </header>
+
+  <section class="project-description">
+  <div class="container">
+    <p>
+      This web application assists in the design and analysis of wireless and mobile networks using AI. 
+      It supports four key scenarios: Wireless Communication Systems, OFDM Systems, Link Budget Calculations, 
+      and Cellular System Design. Users can input system parameters, perform technical computations, and receive 
+      AI-generated explanations of the results.
+    </p>
+  </div>
+</section>
+
+
+  <section class="card-grid">
+
+  <a href="{{ url_for('wireless') }}" class="card">
+  <img src="{{ url_for('static', filename='img/wireless.jpg') }}" alt="Wireless Icon" class="card-img">
+  <h3>Wireless System</h3>
+  <p>Model and simulate wireless networks for various scenarios.</p>
+  </a>
+
+
+  <a href="{{ url_for('ofdm') }}" class="card">
+    <img src= "{{ url_for('static', filename='img/ofdm.png') }}" alt="OFDM Icon" class="card-img">
+    <h3>OFDM Systems</h3>
+    <p>Design and analyze OFDM-based wireless systems.</p>
+  </a>
+
+  <a href="{{url_for('link')}}" class="card">
+    <img src="{{url_for('static',filename = 'img/link_budget.png') }}" alt="Link Budget Icon" class="card-img">
+    <h3>Link Budget</h3>
+    <p>Calculate path loss and performance for any wireless link.</p>
+  </a>
+
+  <a href="{{url_for('cellular')}}"  class="card">
+    <img src= "{{ url_for('static', filename='img/cellular.jpg') }}" alt="Cellular Icon" class="card-img">
+    <h3>Cellular System Design</h3>
+    <p>Design a cellular network based on user-specified parameters.</p>
+  </a>
+
+</section>
+ 
+
+    
+  <footer class="site-footer">
+    <div class="course-info">
+      <strong>Wireless and Mobile Networks, ENCS5323</strong><br>
+      Due 25 June 2025
+    </div>
+
+    <div class="team-info">
+      <span>Malak Moqbel&nbsp;– 1210608</span>
+      <span>Omar Hussain&nbsp;– 1212739</span>
+    </div>
+  </footer>
+
+</body>
+</html>

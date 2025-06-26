@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Link-Budget Calculator</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}?v=9">
+
+  <style>
+    :root { --navy:#002b5c; --glass:#ffffff25; }
+
+    html, body {
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--navy);
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1, h3 {
+      text-align: center;
+      margin: 20px 0;
+      font-weight: 700;
+    }
+
+    form {
+      max-width: 480px;
+      width: 90%;
+      background: var(--glass);
+      backdrop-filter: blur(6px);
+      padding: 26px 28px;
+      border-radius: 14px;
+
+      display: grid;
+      grid-template-columns: 145px 1fr 90px;
+      gap: 8px 10px;
+    }
+
+    label { grid-column: 1 / span 3; font-weight: 600; }
+
+    input, select {
+      width: 100%;
+      padding: 6px 7px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 0.95rem;
+    }
+
+    select { height: 36px; }
+
+    .btn {
+      grid-column: 1 / span 3;
+      margin-top: 24px;
+      padding: 10px;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .results {
+      max-width: 480px;
+      width: 90%;
+      background: #fff;
+      color: var(--navy);
+      border-radius: 14px;
+      box-shadow: 0 2px 6px #0002;
+      padding: 24px 28px;
+      margin-top: 30px;
+    }
+
+    ul {
+      list-style: disc;
+      padding-left: 26px;
+      margin: 10px 0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 14px 0 20px;
+      font-size: 0.9em;
+      background: #fafafa;
+      border-top: 1px solid #ccc;
+    }
+
+    .course-info { margin-bottom: 8px; }
+
+    .footer-home {
+      display: inline-block;
+      margin-top: 6px;
+      font-weight: 600;
+      color: var(--navy);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+<main>
+  <h1>Link-Budget Calculator</h1>
+
+  <form method="POST">
+    {{ form.hidden_tag() }}
+
+    <label>Data-rate</label>          {{ form.data_rate() }} {{ form.dr_unit() }}
+    <label>Noise Figure</label>       {{ form.noise_figure() }} {{ form.nf_unit() }}
+    <label>Noise Temperature (K)</label> {{ form.noise_temp() }} <div></div>
+    <label>Eb/N0</label>              {{ form.ebno() }} {{ form.ebno_unit() }}
+    <label>Link Margin</label>        {{ form.link_margin() }} {{ form.lm_unit() }}
+    <label>Path Loss (Lₚ)</label>     {{ form.path_loss() }} {{ form.path_unit() }}
+    <label>Tx Amplifier Gain (Aₜ)</label> {{ form.tx_amp_gain() }} {{ form.tx_amp_unit() }}
+    <label>Tx Antenna Gain (Gₜ)</label> {{ form.gt() }} {{ form.gt_unit() }}
+    <label>Rx Antenna Gain (Gᵣ)</label> {{ form.gr() }} {{ form.gr_unit() }}
+    <label>Rx Amplifier Gain (Aᵣ)</label> {{ form.ar_gain() }} {{ form.ar_unit() }}
+    <label>Fade Margin</label>        {{ form.fade_margin() }} {{ form.fm_unit() }}
+    <label>Feed-line Loss</label>     {{ form.feed_loss() }} {{ form.feed_unit() }}
+    <label>Other Losses</label>       {{ form.other_loss() }} {{ form.other_unit() }}
+
+    <button class="btn">{{ form.submit.label.text }}</button>
+  </form>
+
+  {% if results %}
+  <div class="results">
+    <h3>Results</h3>
+    <ul>
+      <li><b>Transmit Power:</b> {{ results.pt_dBW }} ({{ results.pt_W }})</li>
+      <li><b>Required Rx Power:</b> {{ results.pr_dBW }} ({{ results.pr_W }})</li>
+    </ul>
+  </div>
+  {% endif %}
+</main>
+
+<footer>
+  <div class="course-info">
+    <strong>Wireless & Mobile Networks, ENCS5323</strong><br>
+    Due 25 June 2025
+  </div>
+  <div>
+    Malak Moqbel – 1210608 &nbsp;|&nbsp;
+    Omar Hussain – 1212739
+  </div>
+  <a class="footer-home" href="{{ url_for('home') }}">← Home</a>
+</footer>
+
+</body>
+</html>
