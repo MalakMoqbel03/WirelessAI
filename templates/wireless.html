@@ -21,7 +21,17 @@
 
     h1,h3      { text-align:center; margin:10px 0 22px; font-weight:700; }
 
-    label      { display:block; margin-top:12px; font-weight:600; }
+    label {
+    display:block;
+    margin-top:12px;
+    font-weight:600;
+
+    /* make text pop */
+    background:#fff;          /* white background */
+    color:var(--navy);        /* keep your navy text colour */
+    padding:4px 8px;          /* little breathing room */
+    border-radius:6px;        /* soft rounded corners */
+  }
 
     select,
     input      { width:100%; padding:7px; margin-top:4px;
@@ -54,6 +64,8 @@
 
   <form method="POST">
     {{ form.hidden_tag() }}
+    <label>Signal bandwidth (Hz)</label>
+    {{ form.signal_bw(class="form-control") }}
 
     <label>LPF bandwidth (Hz)</label>
     {{ form.lpf_bw(class="form-control") }}

@@ -6,8 +6,8 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 _SYSTEM = """
 You are a friendly RF-systems tutor.  Turn the raw data you receive
-into a short *story-style* explanation that walks step-by-step 
-Keep the whole answer under 140 words.
+into a short *story-style* explanation that walks step-by-step in one paragraph Always mention the final results (Outputs)
+Keep the whole answer under 250 words.
 """
 
 def explain(topic: str, inputs: dict, outputs: dict) -> str:
@@ -20,7 +20,7 @@ def explain(topic: str, inputs: dict, outputs: dict) -> str:
             {"role":"system", "content":_SYSTEM},
             {"role":"user",   "content":f"Topic={topic}\n{data}"}
         ],
-        max_tokens=180,
+        max_tokens=380,
         temperature=0.4,
     )
-    return textwrap.fill(rsp.choices[0].message.content, 90)
+    return rsp.choices[0].message.content.strip()

@@ -39,10 +39,16 @@
     }
 
     label {
-      display: block;
-      margin-top: 10px;
-      font-weight: 600;
-    }
+    display:block;
+    margin-top:12px;
+    font-weight:600;
+
+    /* make text pop */
+    background:#fff;          /* white background */
+    color:var(--navy);        /* keep your navy text colour */
+    padding:4px 8px;          /* little breathing room */
+    border-radius:6px;        /* soft rounded corners */
+  }
 
     select, input {
       width: 100%;
@@ -69,10 +75,12 @@
       padding-left: 24px;
       font-size: 1rem;
       margin-top: 5px;
+      color: var(--navy);
     }
 
     .story {
       font-size: 0.9rem;
+      color: var(--navy);
     }
 
     footer {
@@ -82,7 +90,11 @@
       background: #fafafa;
       border-top: 1px solid #ccc;
     }
-
+.card{
+  background:#fff;          /* solid white card */
+  color:var(--navy);         /* keep text navy */
+  backdrop-filter:none;      /* remove blur inherited from form */
+}
     .course-info { margin-bottom: 8px; }
 
     .footer-home {

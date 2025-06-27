@@ -72,70 +72,67 @@ def home():
 
 @app.route("/wireless", methods=["GET", "POST"])
 def wireless():
-    form = WirelessSystemForm()
-    results = {}
+    form, results = WirelessSystemForm(), {}
 
     if form.validate_on_submit():
-        # ── user inputs ──────────────────────────────────────────
-        BW_hz   = form.lpf_bw.data              # LPF bandwidth
-        fs      = 2 * BW_hz                     # Nyquist sampler
-        n_bits  = form.quant_bits.data          # bits / sample
+        # ――― 1) read both bandwidths ―――
+        sig_bw_hz = form.signal_bw.data
+        lpf_bw_hz = form.lpf_bw.data
 
-        R_s     = form.source_rate.data         # source-coding rate
-        R_c     = form.channel_rate.data        # channel-coding rate
+        # effective BW after filtering
+        eff_bw_hz = min(sig_bw_hz, lpf_bw_hz)
+        truncated = sig_bw_hz > lpf_bw_hz
 
-        O_bits  = form.burst_O.data             # burst overhead bits
-        D_bits  = form.burst_D.data             # burst payload bits
-        k_burst = O_bits / D_bits               # overhead fraction
+        # ――― 2) rest of the chain uses eff_bw_hz ―――
+        fs      = 2 * eff_bw_hz
+        n_bits  = form.quant_bits.data
+        R_s     = form.source_rate.data
+        R_c     = form.channel_rate.data
+        O_bits  = form.burst_O.data
+        D_bits  = form.burst_D.data
+        k_burst = O_bits / D_bits
+        k_sym   = form.modulation.data
 
-        k_sym   = form.modulation.data          # bits / symbol
-
-        # ── rate chain ───────────────────────────────────────────
         R_quant = fs * n_bits
         R_src   = R_quant * R_s
         R_chan  = R_src / R_c
-        R_intl  = R_chan                        # no interleaver cost
+        R_intl  = R_chan
         R_burst = R_intl * (1 + k_burst)
         sym_rate = R_burst / k_sym
 
-        scheme = {
-            1: "BPSK", 2: "QPSK", 3: "8-PSK",
-            4: "16-QAM", 6: "64-QAM", 8: "256-QAM"
-        }[k_sym]
-
+        # ――― 3) pack results ―――
         results = {
-            "fs":          f"{fs:,.0f} Sa/s",
-            "quant":       f"{R_quant:,.0f} bps",
-            "src":         f"{R_src:,.0f} bps",
-            "chan":        f"{R_chan:,.0f} bps",
-            "intl":        f"{R_intl:,.0f} bps",
-            "k_burst":     f"{k_burst:.3f}",
-            "burst":       f"{R_burst:,.0f} bps",
-            "sym":         f"{sym_rate:,.1f} sym/s",
-            "explanation":
-                f"fs = 2×BW = {fs/1e3:.1f} kSa/s. "
-                f"{n_bits}-bit quantiser ⇒ {R_quant/1e3:.1f} kbps. "
-                f"Source coding Rₛ={R_s} → {R_src/1e3:.1f} kbps; "
-                f"channel coding R_c={R_c} → {R_chan/1e3:.1f} kbps. "
-                f"O={O_bits}, D={D_bits} → overhead {k_burst:.3f}; "
-                f"burst rate {R_burst/1e3:.1f} kbps. "
-                
-        }
-        inputs  = {
-            "Signal BW":       f"{BW_hz/1e3:.0f} kHz",
-            "Quant bits":      form.quant_bits.data,
-            "Rₛ":              form.source_rate.data,
-            "R_c":             form.channel_rate.data,
-            "Burst O":         form.burst_O.data,
-            "Burst D":         form.burst_D.data,
-            "Mod bits/sym":    form.modulation.data,
+            "fs":        f"{fs:,.0f} Sa/s",
+            "quant":     f"{R_quant:,.0f} bps",
+            "src":       f"{R_src:,.0f} bps",
+            "chan":      f"{R_chan:,.0f} bps",
+            "intl":      f"{R_intl:,.0f} bps",
+            "k_burst":   f"{k_burst:.3f}",
+            "burst":     f"{R_burst:,.0f} bps",
+            "sym":       f"{sym_rate:,.1f} sym/s",
         }
 
-        # ---------- AI story ----------
+        if truncated:
+            results["note"] = (
+                f"⚠️  Input signal BW ({sig_bw_hz/1e3:.1f} kHz) "
+                f"exceeds LPF BW; truncated to {eff_bw_hz/1e3:.1f} kHz."
+            )
+
+        # — human-readable inputs for the AI story —
+        inputs = {
+            "Signal BW":      f"{sig_bw_hz/1e3:.3g} kHz",
+            "LPF BW":         f"{lpf_bw_hz/1e3:.3g} kHz",
+            "Quant bits":     n_bits,
+            "Rₛ":             R_s,
+            "R_c":            R_c,
+            "Burst O":        O_bits,
+            "Burst D":        D_bits,
+            "Mod bits/sym":   k_sym,
+        }
         results["explanation"] = explain("wireless", inputs, results)
 
-       
     return render_template("wireless.html", form=form, results=results)
+
 @app.route("/ofdm", methods=["GET", "POST"])
 def ofdm():
     form = OFDMForm()
@@ -172,49 +169,53 @@ def ofdm():
         results["explanation"] = explain("OFDM", inputs, results)   
 
     return render_template("ofdm.html", form=form, results=results)
-
 @app.route("/link", methods=["GET", "POST"])
 def link():
     form = LinkBudgetForm()
     results = {}
-    if form.validate_on_submit():
-        r_bps = form.data_rate.data * 1e3
-        pr_db = (form.link_margin.data + K_dB_Hz + 10*math.log10(form.noise_temp.data) + form.noise_figure.data + 10*math.log10(r_bps) + form.ebno.data)
-        pt_db = (pr_db + form.path_loss.data + form.feed_loss.data + form.other_loss.data + form.fade_margin.data - form.gt.data - form.gr.data - form.tx_amp_gain.data - form.ar_gain.data)
-        results = dict(pr_dBW=f"{pr_db:,.2f} dB", pr_W=f"{db_to_w(pr_db):.6f} W", pt_dBW=f"{pt_db:,.2f} dB", pt_W=f"{db_to_w(pt_db):.6f} W")
-        
-        
-        # … previous calculations …
 
+    if form.validate_on_submit():
+        r_bps = form.data_rate.data * 1e3  # <-- still assumes input in kbps
+        pr_db = (form.link_margin.data + K_dB_Hz
+                 + 10*math.log10(form.noise_temp.data)
+                 + form.noise_figure.data
+                 + 10*math.log10(r_bps)
+                 + form.ebno.data)
+
+        pt_db = (pr_db + form.path_loss.data + form.feed_loss.data
+                 + form.other_loss.data + form.fade_margin.data
+                 - form.gt.data - form.gr.data
+                 - form.tx_amp_gain.data - form.ar_gain.data)
+
+        # *** single, authoritative results dict ***
         results = {
-            "P_rx (dBW)": f"{pr_db:,.2f}",
-            "P_rx (W)":   f"{db_to_w(pr_db):.6f}",
-            "P_tx (dBW)": f"{pt_db:,.2f}",
-            "P_tx (W)":   f"{db_to_w(pt_db):.6f}"
+        "P_rx (dBW)": f"{pr_db:,.2f}",
+        "P_rx (W)":   f"{db_to_w(pr_db):.6f}",
+        "P_tx (dBW)": f"{pt_db:,.2f}",
+        "P_tx (W)":   f"{db_to_w(pt_db):.6f}"
         }
 
-        # ---------- NEW inputs ----------
+
+        # ---------- inputs summary for AI explanation ----------
         inputs = {
-            "Data-rate":          f"{form.data_rate.data} {form.dr_unit.data}",
-            "Eb/N0":              f"{form.ebno.data} {form.ebno_unit.data}",
-            "Link margin":        f"{form.link_margin.data} {form.lm_unit.data}",
-            "Noise figure":       f"{form.noise_figure.data} dB",
-            "Noise temperature":  f"{form.noise_temp.data} K",
-            "Path loss":          f"{form.path_loss.data} dB",
-            "Fade margin":        f"{form.fade_margin.data} dB",
-            "Feed loss":          f"{form.feed_loss.data} dB",
-            "Other losses":       f"{form.other_loss.data} dB",
-            "G_t":                f"{form.gt.data} dB",
-            "G_r":                f"{form.gr.data} dB",
-            "Tx amp gain":        f"{form.tx_amp_gain.data} dB",
-            "Rx amp gain":        f"{form.ar_gain.data} dB"
+            "Data-rate":         f"{form.data_rate.data} {form.dr_unit.data}",
+            "Eb/N0":             f"{form.ebno.data} {form.ebno_unit.data}",
+            "Link margin":       f"{form.link_margin.data} {form.lm_unit.data}",
+            "Noise figure":      f"{form.noise_figure.data} dB",
+            "Noise temperature": f"{form.noise_temp.data} K",
+            "Path loss":         f"{form.path_loss.data} dB",
+            "Fade margin":       f"{form.fade_margin.data} dB",
+            "Feed loss":         f"{form.feed_loss.data} dB",
+            "Other losses":      f"{form.other_loss.data} dB",
+            "G_t":               f"{form.gt.data} dB",
+            "G_r":               f"{form.gr.data} dB",
+            "Tx amp gain":       f"{form.tx_amp_gain.data} dB",
+            "Rx amp gain":       f"{form.ar_gain.data} dB"
         }
 
         results["explanation"] = explain("Link Budget", inputs, results)
 
     return render_template("link_budget.html", form=form, results=results)
-# ——— Standard cluster sizes (GSM / LTE reuse) ———
-
 
 
 

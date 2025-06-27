@@ -295,14 +295,20 @@ html,body{min-height:100vh;display:flex;flex-direction:column}
   max-width:480px;
   margin:0 auto;
   border-radius:14px;
-  background:var(--glass);
+  background:  #fff;
   backdrop-filter:blur(6px);
   overflow:visible;           
   padding:22px 26px;
   overflow:visible;    
 }
 .story{
-  font-size:.9rem;
-  white-space:pre-wrap;        /* preserve \n from GPT */
-  line-height:1.4;
+  white-space:pre-line;             /* honour \n but still wrap long lines */
+  line-height:1.45;                 /* a touch more breathing-room         */
+  margin-top:18px;                  /* gentle gap below the list           */
+}
+
+.results{
+  width:clamp(320px, 95vw, 720px);  /* up to 720 px on large screens   */
+  max-height:none;                  /* remove any implicit cap         */
+  overflow:visible;                 /* never hide overflow             */
 }

@@ -36,34 +36,36 @@ UNIT_LOSS_GAIN  = [("dB", "dB"), ("dBm", "dBm"), ("W", "W")]
 # ────────────────────────────────────────────────
 # Forms
 # ────────────────────────────────────────────────
+
 class WirelessSystemForm(FlaskForm):
-    # front-end
-    lpf_bw      = FloatField("LPF Bandwidth (Hz)",
+    # NEW front-end bandwidth fields
+    signal_bw = FloatField(
+        "Signal bandwidth (Hz)",
+        validators=[InputRequired(), NumberRange(min=0.001)]
+    )
+    lpf_bw    = FloatField(
+        "LPF bandwidth (Hz)",
+        validators=[InputRequired(), NumberRange(min=0.001)]
+    )
+
+    # existing fields
+    quant_bits  = FloatField("Quantiser bits / sample",
                              validators=[InputRequired(), NumberRange(min=1)])
-    quant_bits  = FloatField("Quantiser Bits / Sample",
+    source_rate = FloatField("Source-coding rate Rₛ (<1)",
+                             validators=[InputRequired(), NumberRange(min=0)])
+    channel_rate= FloatField("Channel-code rate R_c (<1)",
+                             validators=[InputRequired(), NumberRange(min=0)])
+    burst_O     = FloatField("Burst overhead bits (O)",
+                             validators=[InputRequired(), NumberRange(min=0)])
+    burst_D     = FloatField("Burst payload bits (D)",
                              validators=[InputRequired(), NumberRange(min=1)])
-
-    # coding
-    source_rate  = FloatField("Source-coding Rate Rₛ (<1)",
-                              validators=[InputRequired(), NumberRange(min=0)])
-    channel_rate = FloatField("Channel-code Rate R_c (<1)",
-                              validators=[InputRequired(), NumberRange(min=0)])
-
-    # burst formatter inputs
-    burst_O = FloatField("Burst Overhead Bits (O)",
-                         validators=[InputRequired(), NumberRange(min=0)])
-    burst_D = FloatField("Payload Bits per Burst (D)",
-                         validators=[InputRequired(), NumberRange(min=1)])
-
-    # modulation
-    modulation = SelectField(
+    modulation  = SelectField(
         "Modulation",
         choices=[(1,"BPSK"),(2,"QPSK"),(3,"8-PSK"),
                  (4,"16-QAM"),(6,"64-QAM"),(8,"256-QAM")],
-        coerce=int)
-    
+        coerce=int
+    )
     submit = SubmitField("Calculate")
-
 
 
 
